@@ -10,6 +10,7 @@ import '../widgets/detail/trip_hero_header.dart';
 import '../widgets/detail/trip_progress_card.dart';
 import '../widgets/detail/trip_quick_actions.dart';
 import '../widgets/detail/trip_section_grid.dart';
+import '../../../budget/presentation/pages/budget_page.dart';
 
 class TripDetailPage extends StatelessWidget {
   final Trip trip;
@@ -87,6 +88,15 @@ class TripDetailPage extends StatelessWidget {
 
           TripSectionGrid(
             onTimelineTap: () => openTimeline(context),
+            onMapTap: () => openMap(context),
+            onBudgetTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BudgetPage(trip: trip),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: AppSpacing.xxl),

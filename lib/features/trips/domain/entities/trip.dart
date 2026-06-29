@@ -12,7 +12,10 @@ class Trip {
   final String? coverImage;
   final String? notes;
   final int stopCount;
+
+  /// Budget previsto del viaggio.
   final double budget;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 

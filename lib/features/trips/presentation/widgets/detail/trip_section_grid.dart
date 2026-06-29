@@ -5,10 +5,14 @@ import '../../../../../shared/widgets/app_card.dart';
 
 class TripSectionGrid extends StatelessWidget {
   final VoidCallback? onTimelineTap;
+  final VoidCallback? onMapTap;
+  final VoidCallback? onBudgetTap;
 
   const TripSectionGrid({
     super.key,
     this.onTimelineTap,
+    this.onMapTap,
+    this.onBudgetTap,
   });
 
   @override
@@ -27,10 +31,11 @@ class TripSectionGrid extends StatelessWidget {
           subtitle: 'Tappe e attività',
           onTap: onTimelineTap,
         ),
-        const _SectionTile(
+        _SectionTile(
           icon: Icons.map_outlined,
           title: 'Mappa',
           subtitle: 'Percorso',
+          onTap: onMapTap,
         ),
         const _SectionTile(
           icon: Icons.hotel_outlined,
@@ -42,10 +47,11 @@ class TripSectionGrid extends StatelessWidget {
           title: 'Voli',
           subtitle: 'Biglietti',
         ),
-        const _SectionTile(
+        _SectionTile(
           icon: Icons.account_balance_wallet_outlined,
           title: 'Budget',
           subtitle: 'Spese',
+          onTap: onBudgetTap,
         ),
         const _SectionTile(
           icon: Icons.description_outlined,

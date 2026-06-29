@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../features/stops/data/models/trip_stop_isar_model.dart';
+import '../../features/budget/data/models/expense_isar_model.dart';
 
 import '../../../features/trips/data/models/trip_isar_model.dart';
 
@@ -25,6 +26,7 @@ class IsarService {
       [
         TripIsarModelSchema,
         TripStopIsarModelSchema,
+        ExpenseIsarModelSchema,
       ],
       directory: dir.path,
     );
