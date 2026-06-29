@@ -14,6 +14,8 @@ class AppSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final action = this.action;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -41,7 +43,7 @@ class AppSection extends StatelessWidget {
               ],
             ),
           ),
-          if (action != null) action!,
+          ...?(action == null ? null : [action]),
         ],
       ),
     );
