@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/extensions/trip_stop_category_extensions.dart';
+import '../../../../core/services/app_snackbar_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../domain/entities/stop.dart';
 import '../providers/trip_stop_provider.dart';
+import '../widgets/place_search_card.dart';
 
 class NewStopPage extends ConsumerStatefulWidget {
   final String tripId;
@@ -28,6 +30,8 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
   final addressController = TextEditingController();
   final descriptionController = TextEditingController();
   final timeController = TextEditingController();
+  final latitudeController = TextEditingController();
+  final longitudeController = TextEditingController();
 
   TripStopCategory selectedCategory = TripStopCategory.place;
   TimeOfDay? selectedTime;
@@ -46,6 +50,14 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
     descriptionController.text = stop.description ?? '';
     selectedCategory = stop.category;
 
+    if (stop.latitude != null) {
+      latitudeController.text = stop.latitude.toString();
+    }
+
+    if (stop.longitude != null) {
+      longitudeController.text = stop.longitude.toString();
+    }
+
     if (stop.arrivalTime != null) {
       selectedTime = TimeOfDay.fromDateTime(stop.arrivalTime!);
       timeController.text =
@@ -59,6 +71,8 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
     addressController.dispose();
     descriptionController.dispose();
     timeController.dispose();
+    latitudeController.dispose();
+    longitudeController.dispose();
     super.dispose();
   }
 
@@ -91,16 +105,42 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
     );
   }
 
+  double? parseCoordinate(String value) {
+    final normalized = value.trim().replaceAll(',', '.');
+
+    if (normalized.isEmpty) return null;
+
+    return double.tryParse(normalized);
+  }
+
   void saveStop() {
     final title = titleController.text.trim();
     final address = addressController.text.trim();
     final description = descriptionController.text.trim();
 
+    final latitude = parseCoordinate(latitudeController.text);
+    final longitude = parseCoordinate(longitudeController.text);
+
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Inserisci il titolo della tappa.'),
-        ),
+      AppSnackbarService.showError(
+        context,
+        'Inserisci il titolo della tappa.',
+      );
+      return;
+    }
+
+    if (latitudeController.text.trim().isNotEmpty && latitude == null) {
+      AppSnackbarService.showError(
+        context,
+        'Latitudine non valida.',
+      );
+      return;
+    }
+
+    if (longitudeController.text.trim().isNotEmpty && longitude == null) {
+      AppSnackbarService.showError(
+        context,
+        'Longitudine non valida.',
       );
       return;
     }
@@ -113,8 +153,8 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
       title: title,
       address: address.isEmpty ? null : address,
       description: description.isEmpty ? null : description,
-      latitude: oldStop?.latitude,
-      longitude: oldStop?.longitude,
+      latitude: latitude,
+      longitude: longitude,
       arrivalTime: buildArrivalTime(),
       departureTime: oldStop?.departureTime,
       category: selectedCategory,
@@ -182,11 +222,53 @@ class _NewStopPageState extends ConsumerState<NewStopPage> {
             readOnly: true,
             onTap: pickTime,
           ),
+          PlaceSearchCard(
+            onPlaceSelected: (place) {
+              addressController.text = place.address;
+              latitudeController.text = place.latitude.toString();
+              longitudeController.text = place.longitude.toString();
+
+              AppSnackbarService.showSuccess(
+                context,
+                'Luogo trovato',
+              );
+            },
+          ),
+
+          const SizedBox(height: AppSpacing.md),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             controller: addressController,
             label: 'Indirizzo',
             icon: Icons.location_on_outlined,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: AppTextField(
+                  controller: latitudeController,
+                  label: 'Latitudine',
+                  icon: Icons.my_location_outlined,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppTextField(
+                  controller: longitudeController,
+                  label: 'Longitudine',
+                  icon: Icons.explore_outlined,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/services/app_snackbar_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_section.dart';
+import '../../../maps/presentation/pages/trip_map_page.dart';
+import '../../../stops/presentation/pages/trip_timeline_page.dart';
 import '../../domain/entities/trip.dart';
 import '../widgets/detail/trip_hero_header.dart';
 import '../widgets/detail/trip_progress_card.dart';
 import '../widgets/detail/trip_quick_actions.dart';
 import '../widgets/detail/trip_section_grid.dart';
-import '../../../stops/presentation/pages/trip_timeline_page.dart';
 
 class TripDetailPage extends StatelessWidget {
   final Trip trip;
@@ -18,9 +20,26 @@ class TripDetailPage extends StatelessWidget {
   });
 
   void showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature disponibile nei prossimi step.'),
+    AppSnackbarService.showInfo(
+      context,
+      '$feature disponibile nei prossimi step.',
+    );
+  }
+
+  void openMap(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TripMapPage(trip: trip),
+      ),
+    );
+  }
+
+  void openTimeline(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TripTimelinePage(trip: trip),
       ),
     );
   }
@@ -53,7 +72,8 @@ class TripDetailPage extends StatelessWidget {
           ),
 
           TripQuickActions(
-            onAddStop: () => showComingSoon(context, 'Tappe'),
+            onOpenMap: () => openMap(context),
+            onAddStop: () => openTimeline(context),
             onAddExpense: () => showComingSoon(context, 'Budget'),
             onAddDocument: () => showComingSoon(context, 'Documenti'),
           ),
@@ -66,14 +86,7 @@ class TripDetailPage extends StatelessWidget {
           ),
 
           TripSectionGrid(
-            onTimelineTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TripTimelinePage(trip: trip),
-                ),
-              );
-            },
+            onTimelineTap: () => openTimeline(context),
           ),
 
           const SizedBox(height: AppSpacing.xxl),

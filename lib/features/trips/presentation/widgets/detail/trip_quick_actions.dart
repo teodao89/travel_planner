@@ -5,12 +5,14 @@ import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_card.dart';
 
 class TripQuickActions extends StatelessWidget {
+  final VoidCallback? onOpenMap;
   final VoidCallback? onAddStop;
   final VoidCallback? onAddExpense;
   final VoidCallback? onAddDocument;
 
   const TripQuickActions({
     super.key,
+    this.onOpenMap,
     this.onAddStop,
     this.onAddExpense,
     this.onAddDocument,
@@ -22,19 +24,32 @@ class TripQuickActions extends StatelessWidget {
       child: Column(
         children: [
           AppButton(
+            label: 'Mappa',
+            icon: Icons.map_outlined,
+            onPressed: onOpenMap,
+            fullWidth: true,
+          ),
+
+          const SizedBox(height: AppSpacing.sm),
+
+          AppButton(
             label: 'Aggiungi tappa',
             icon: Icons.add_location_alt_outlined,
             onPressed: onAddStop,
             fullWidth: true,
           ),
+
           const SizedBox(height: AppSpacing.sm),
+
           AppButton(
             label: 'Aggiungi spesa',
             icon: Icons.account_balance_wallet_outlined,
             onPressed: onAddExpense,
             fullWidth: true,
           ),
+
           const SizedBox(height: AppSpacing.sm),
+
           AppButton(
             label: 'Aggiungi documento',
             icon: Icons.description_outlined,
