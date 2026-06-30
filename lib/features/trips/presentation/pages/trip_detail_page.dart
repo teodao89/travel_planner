@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/app_snackbar_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_section.dart';
+import '../../../budget/presentation/pages/budget_page.dart';
+import '../../../documents/presentation/pages/documents_page.dart';
 import '../../../maps/presentation/pages/trip_map_page.dart';
 import '../../../stops/presentation/pages/trip_timeline_page.dart';
 import '../../domain/entities/trip.dart';
@@ -10,7 +12,6 @@ import '../widgets/detail/trip_hero_header.dart';
 import '../widgets/detail/trip_progress_card.dart';
 import '../widgets/detail/trip_quick_actions.dart';
 import '../widgets/detail/trip_section_grid.dart';
-import '../../../budget/presentation/pages/budget_page.dart';
 
 class TripDetailPage extends StatelessWidget {
   final Trip trip;
@@ -45,6 +46,24 @@ class TripDetailPage extends StatelessWidget {
     );
   }
 
+  void openDocuments(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DocumentsPage(trip: trip),
+      ),
+    );
+  }
+
+  void openBudget(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BudgetPage(trip: trip),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,50 +74,34 @@ class TripDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           TripHeroHeader(trip: trip),
-
           const SizedBox(height: AppSpacing.lg),
-
           const AppSection(
             title: 'Riepilogo',
             subtitle: 'Stato del viaggio',
           ),
-
           TripProgressCard(trip: trip),
-
           const SizedBox(height: AppSpacing.lg),
-
           const AppSection(
             title: 'Azioni rapide',
             subtitle: 'Aggiungi elementi al viaggio',
           ),
-
           TripQuickActions(
             onOpenMap: () => openMap(context),
             onAddStop: () => openTimeline(context),
-            onAddExpense: () => showComingSoon(context, 'Budget'),
-            onAddDocument: () => showComingSoon(context, 'Documenti'),
+            onAddExpense: () => openBudget(context),
+            onAddDocument: () => openDocuments(context),
           ),
-
           const SizedBox(height: AppSpacing.lg),
-
           const AppSection(
             title: 'Organizza',
             subtitle: 'Tutte le sezioni del viaggio',
           ),
-
           TripSectionGrid(
             onTimelineTap: () => openTimeline(context),
             onMapTap: () => openMap(context),
-            onBudgetTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BudgetPage(trip: trip),
-                ),
-              );
-            },
+            onBudgetTap: () => openBudget(context),
+            onDocumentsTap: () => openDocuments(context),
           ),
-
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),

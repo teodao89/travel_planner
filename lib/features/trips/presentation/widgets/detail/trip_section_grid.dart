@@ -7,12 +7,14 @@ class TripSectionGrid extends StatelessWidget {
   final VoidCallback? onTimelineTap;
   final VoidCallback? onMapTap;
   final VoidCallback? onBudgetTap;
+  final VoidCallback? onDocumentsTap;
 
   const TripSectionGrid({
     super.key,
     this.onTimelineTap,
     this.onMapTap,
     this.onBudgetTap,
+    this.onDocumentsTap,
   });
 
   @override
@@ -53,10 +55,11 @@ class TripSectionGrid extends StatelessWidget {
           subtitle: 'Spese',
           onTap: onBudgetTap,
         ),
-        const _SectionTile(
+        _SectionTile(
           icon: Icons.description_outlined,
           title: 'Documenti',
           subtitle: 'Voucher e PDF',
+          onTap: onDocumentsTap,
         ),
       ],
     );
