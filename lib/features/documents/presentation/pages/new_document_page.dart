@@ -1,8 +1,14 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mime/mime.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/extensions/document_category_extensions.dart';
 import '../../../../core/services/app_snackbar_service.dart';
+import '../../../../core/services/file_storage_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
@@ -63,6 +69,30 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
     return 'application/octet-stream';
   }
 
+  Future<void> pickFile() async {
+    final result = await FilePicker.platform.pickFiles();
+
+    if (result == null || result.files.single.path == null) return;
+
+    final sourcePath = result.files.single.path!;
+
+    final savedPath = await const FileStorageService().saveFile(
+      sourcePath: sourcePath,
+      tripId: widget.tripId,
+    );
+
+    setState(() {
+      filePathController.text = savedPath;
+    });
+
+    if (mounted) {
+      AppSnackbarService.showSuccess(
+        context,
+        'File selezionato',
+      );
+    }
+  }
+
   void saveDocument() {
     final title = titleController.text.trim();
     final filePath = filePathController.text.trim();
@@ -79,11 +109,12 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
     if (filePath.isEmpty) {
       AppSnackbarService.showError(
         context,
-        'Inserisci il percorso del file.',
+        'Seleziona un file.',
       );
       return;
     }
 
+    final file = File(filePath);
     final oldDocument = widget.document;
 
     final document = TravelDocument(
@@ -93,8 +124,8 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
       category: selectedCategory,
       filePath: filePath,
       thumbnailPath: oldDocument?.thumbnailPath,
-      mimeType: oldDocument?.mimeType ?? guessMimeType(filePath),
-      fileSize: oldDocument?.fileSize ?? 0,
+      mimeType: lookupMimeType(filePath) ?? guessMimeType(filePath),
+      fileSize: file.existsSync() ? file.lengthSync() : 0,
       notes: notes.isEmpty ? null : notes,
       createdAt: oldDocument?.createdAt,
       updatedAt: DateTime.now(),
@@ -113,6 +144,8 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final hasSelectedFile = filePathController.text.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? 'Modifica documento' : 'Nuovo documento'),
@@ -125,6 +158,7 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
             label: 'Titolo documento',
             icon: Icons.description_outlined,
           ),
+
           const SizedBox(height: AppSpacing.md),
 
           DropdownButtonFormField<DocumentCategory>(
@@ -136,11 +170,22 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
             items: DocumentCategory.values.map((category) {
               return DropdownMenuItem(
                 value: category,
-                child: Text(category.name),
+                child: Row(
+                  children: [
+                    Icon(
+                      category.icon,
+                      color: category.color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(category.label),
+                  ],
+                ),
               );
             }).toList(),
             onChanged: (value) {
               if (value == null) return;
+
               setState(() {
                 selectedCategory = value;
               });
@@ -149,11 +194,23 @@ class _NewDocumentPageState extends ConsumerState<NewDocumentPage> {
 
           const SizedBox(height: AppSpacing.md),
 
-          AppTextField(
-            controller: filePathController,
-            label: 'Percorso file',
-            icon: Icons.folder_outlined,
+          AppButton(
+            label: hasSelectedFile ? 'File selezionato' : 'Seleziona file',
+            icon: Icons.attach_file,
+            fullWidth: true,
+            onPressed: pickFile,
           ),
+
+          if (hasSelectedFile) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              filePathController.text,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
+              ),
+            ),
+          ],
 
           const SizedBox(height: AppSpacing.md),
 

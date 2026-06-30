@@ -4,6 +4,7 @@ import '../../features/stops/data/models/trip_stop_isar_model.dart';
 import '../../features/budget/data/models/expense_isar_model.dart';
 
 import '../../../features/trips/data/models/trip_isar_model.dart';
+import '../../features/documents/data/models/travel_document_isar_model.dart';
 
 class IsarService {
   static Isar? _isar;
@@ -27,6 +28,7 @@ class IsarService {
         TripIsarModelSchema,
         TripStopIsarModelSchema,
         ExpenseIsarModelSchema,
+        TravelDocumentIsarModelSchema,
       ],
       directory: dir.path,
     );

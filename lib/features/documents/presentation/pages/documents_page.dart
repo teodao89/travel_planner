@@ -5,7 +5,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
 import '../../../trips/domain/entities/trip.dart';
 import '../providers/document_provider.dart';
+import 'document_preview_page.dart';
 import 'new_document_page.dart';
+import '../../../../core/extensions/document_category_extensions.dart';
 
 class DocumentsPage extends ConsumerWidget {
   final Trip trip;
@@ -56,15 +58,38 @@ class DocumentsPage extends ConsumerWidget {
 
           return Card(
             child: ListTile(
-              leading: Icon(
-                document.mimeType == 'application/pdf'
-                    ? Icons.picture_as_pdf
-                    : Icons.image_outlined,
+              leading: CircleAvatar(
+                backgroundColor: document.category.color.withValues(alpha: 0.15),
+                child: Icon(
+                  document.category.icon,
+                  color: document.category.color,
+                ),
               ),
               title: Text(document.title),
-              subtitle: Text(document.mimeType),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(document.category.label),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${(document.fileSize / 1024).toStringAsFixed(1)} KB',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DocumentPreviewPage(
+                      document: document,
+                    ),
+                  ),
+                );
+              },
+              onLongPress: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
