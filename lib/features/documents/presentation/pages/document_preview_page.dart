@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/services/app_snackbar_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/travel_document.dart';
 
@@ -18,6 +20,31 @@ class DocumentPreviewPage extends StatelessWidget {
 
   bool get isImage => document.mimeType.startsWith('image/');
 
+  Future<void> shareDocument(BuildContext context) async {
+    final file = File(document.filePath);
+
+    if (!await file.exists()) {
+      if (context.mounted) {
+        AppSnackbarService.showError(
+          context,
+          'File non trovato.',
+        );
+      }
+      return;
+    }
+
+    await Share.shareXFiles(
+      [
+        XFile(
+          file.path,
+          mimeType: document.mimeType,
+          name: document.title,
+        ),
+      ],
+      text: document.title,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final file = File(document.filePath);
@@ -25,6 +52,13 @@ class DocumentPreviewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(document.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Condividi',
+            onPressed: () => shareDocument(context),
+          ),
+        ],
       ),
       body: FutureBuilder<bool>(
         future: file.exists(),
@@ -58,9 +92,7 @@ class DocumentPreviewPage extends StatelessWidget {
           }
 
           if (isPdf) {
-            return PdfViewer.file(
-              file.path,
-            );
+            return PdfViewer.file(file.path);
           }
 
           return const Center(
