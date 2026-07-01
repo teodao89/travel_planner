@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
 import '../../../../shared/widgets/app_section.dart';
 import '../../../../shared/widgets/home_header.dart';
+import '../providers/home_dashboard_provider.dart';
 import '../providers/trip_provider.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/trip_card.dart';
@@ -63,6 +64,8 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trips = ref.watch(tripListProvider);
+    final dashboard = ref.watch(homeDashboardProvider);
+
 
     return Scaffold(
       body: SafeArea(
@@ -71,19 +74,17 @@ class HomePage extends ConsumerWidget {
           children: [
             HomeHeader(tripCount: trips.length),
             const SizedBox(height: AppSpacing.lg),
-
             const AppSection(
               title: 'Dashboard',
               subtitle: 'La tua panoramica',
             ),
             DashboardCard(
-              tripCount: trips.length,
-              stopCount: 0,
-              budget: 0,
+              tripCount: dashboard.tripCount,
+              stopCount: dashboard.stopCount,
+              documentCount: dashboard.documentCount,
+              budget: dashboard.totalBudget,
             ),
-
             const SizedBox(height: AppSpacing.lg),
-
             if (trips.isEmpty)
               AppEmptyState(
                 icon: Icons.luggage,
@@ -125,7 +126,6 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
             ],
-
             const SizedBox(height: AppSpacing.xxl),
           ],
         ),

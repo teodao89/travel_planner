@@ -7,12 +7,14 @@ import '../../../../shared/widgets/app_stat.dart';
 class DashboardCard extends StatelessWidget {
   final int tripCount;
   final int stopCount;
+  final int documentCount;
   final double budget;
 
   const DashboardCard({
     super.key,
     required this.tripCount,
     required this.stopCount,
+    required this.documentCount,
     required this.budget,
   });
 
@@ -31,6 +33,12 @@ class DashboardCard extends StatelessWidget {
             icon: Icons.place_outlined,
             value: stopCount.toString(),
             label: 'Tappe',
+          ),
+          const SizedBox(width: AppSpacing.md),
+          AppStat(
+            icon: Icons.description_outlined,
+            value: documentCount.toString(),
+            label: 'Documenti',
           ),
           const SizedBox(width: AppSpacing.md),
           AppStat(

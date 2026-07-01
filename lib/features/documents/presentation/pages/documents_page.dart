@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/extensions/document_category_extensions.dart';
+import '../../../../core/services/file_storage_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
 import '../../../trips/domain/entities/trip.dart';
+import '../../domain/entities/travel_document.dart';
 import '../providers/document_provider.dart';
 import 'document_preview_page.dart';
 import 'new_document_page.dart';
-import '../../../../core/extensions/document_category_extensions.dart';
 
 class DocumentsPage extends ConsumerWidget {
   final Trip trip;
@@ -16,6 +18,50 @@ class DocumentsPage extends ConsumerWidget {
     super.key,
     required this.trip,
   });
+
+  Future<void> confirmDeleteDocument(
+      BuildContext context,
+      WidgetRef ref,
+      String tripId,
+      TravelDocument document,
+      ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Eliminare documento?'),
+        content: Text(
+          'Vuoi eliminare "${document.title}"?\n\n'
+              'Il file verrà rimosso definitivamente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annulla'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Elimina'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    await const FileStorageService().deleteFile(document.filePath);
+
+    await ref
+        .read(documentsProvider(tripId).notifier)
+        .deleteDocument(document.id);
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Documento eliminato'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,7 +105,8 @@ class DocumentsPage extends ConsumerWidget {
           return Card(
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: document.category.color.withValues(alpha: 0.15),
+                backgroundColor:
+                document.category.color.withValues(alpha: 0.15),
                 child: Icon(
                   document.category.icon,
                   color: document.category.color,
@@ -78,7 +125,16 @@ class DocumentsPage extends ConsumerWidget {
                   ),
                 ],
               ),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Elimina documento',
+                onPressed: () => confirmDeleteDocument(
+                  context,
+                  ref,
+                  trip.id,
+                  document,
+                ),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
